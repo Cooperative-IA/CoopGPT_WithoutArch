@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 env = os.getenv("ENV")
 os.environ["OPENAI_API_TYPE"] = os.getenv("OPENAI_API_TYPE")    
 os.environ["OPENAI_API_VERSION"] = os.getenv("OPENAI_API_VERSION")

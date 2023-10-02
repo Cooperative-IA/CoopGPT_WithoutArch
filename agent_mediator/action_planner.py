@@ -3,12 +3,34 @@ import subprocess
 import re
 import json
 import ast
+from agent_mediator.observations_descriptor import ObservationsDescriptor
 from agent_mediator.llm_mediator import llm_mediator
 from agent_mediator.agent import Agent
 import os
 from dotenv import load_dotenv
 
 ruta_config = "config/config.json"  
+
+
+GLOBAL_MAP = """WWWWWWWWWWWWWWWWWWWWWWWW
+WAAA    A      A    AAAW
+WAA    AAA    AAA    AAW
+WA    AAGAA  AAAAA    AW
+W      AAA    AAA      W
+W       A      A       W
+W  A                A  W
+W AAA  Q        Q  AAA W
+WAAAAA            AAAAAW
+W AAA              AAA W
+W  A                A  W
+W                      W
+W                      W
+W                      W
+W  PPPPPPPPPPPPPPPPPP  W
+W PPPPPPPPPPPPPPPPPPPP W
+WPPPPPPPPPPPPPPPPPPPPPPW
+WWWWWWWWWWWWWWWWWWWWWWWW"""
+
 
 _BASE_ACTION_MAP = {
     0:{
@@ -52,14 +74,17 @@ class ActionPlanner(object):
         self.agents_current_goals ={}
         self.agents_count = agents_count
         self.agents_bio_path = agents_bio_path
-        self.initalize_env()
+        self.initialize_env()
         # Initialize the global system context
         self.initialize_system_context(agents_count, number_of_roles = 1)
         # Create the agents list
         self.agents_dictionary = self.initialize_agents_bio()
+        self.action_map = {i: {'move': 0, 'turn': 0, 'fireZap': 0} for i in range(agents_count)}
+        
+        self.global_map = GLOBAL_MAP
+        self.observations_descriptor = ObservationsDescriptor(self.global_map)
 
-
-    def initialize_env():
+    def initialize_env(self):
         load_dotenv()
 
 
@@ -343,11 +368,12 @@ class ActionPlanner(object):
     matrix_conversor_path = "test_substrate.py"
 
     async def transform_obs_into_actions(self, description:str):
-        #input("Press Enter to continue...")
+        input("Press Enter to continue...")
         print(description.strip())
         agent_obs = self.retrieve_agent_observations(description.strip())
         agent_obs_desc = self.agent_observations_descriptor(agent_obs)
 
+        print("--------------AGENT OBS DESC------------------------\n",self.observations_descriptor.get_all_observations_descritions(description.strip()),"\n--------------------------------------\n"  )
 
         querys_dict = self.create_querys(agent_obs_desc) 
         print("--------------QUERYS DICT------------------------\n",querys_dict,"\n--------------------------------------\n")

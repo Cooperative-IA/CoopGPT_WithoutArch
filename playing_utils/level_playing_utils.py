@@ -193,8 +193,9 @@ class ActionReader(object):
         return actions
 
 
-
-    def llm_step(self, new_action_map, player_prefixes)-> Mapping[str, int]:
+    
+    ## --------- TODO  OUR CODE HERE ---------
+    def various_agents_step(self, new_action_map, player_prefixes)-> Mapping[str, int]:
         """Update the actions of player `player_prefix`."""
         #print("--------------------NEW ACTION MAP-------------\n", new_action_map)
         actions = {action_key: 0 for action_key in self._action_spec.keys()}
@@ -285,7 +286,6 @@ async def run_episode(
     full_config.lab2d_settings.update(config_overrides)
     descriptor = SceneDescriptor(full_config)
 
-
     if player_prefixes is None:
         player_count = full_config.lab2d_settings.get('numPlayers', 1)
         # By default, we use lua indices (which start at 1) as player prefixes.
@@ -293,10 +293,11 @@ async def run_episode(
     else:
         player_count = len(player_prefixes)
     print(f'Running an episode with {player_count} players: {player_prefixes}.')
-
+    
+    ## --------- TODO  OUR CODE HERE ---------
     # Define the Action Planner
     action_planner =  ActionPlanner(agents_count=player_count, agents_bio_path="data/agents/agents_bio_0.json")
-
+    ## --------- END OF OUR CODE ---------
     with env_builder(**full_config) as env:
 
         if len(player_prefixes) != player_count:
@@ -341,6 +342,8 @@ async def run_episode(
             game_recorder = Recorder("logs", full_config)
             record_counter = 0
         # Game loop
+        first_move = True
+        next_action_map = action_planner.action_map
         while True:
 
             # Check for pygame controls
@@ -358,21 +361,27 @@ async def run_episode(
             if stop:
                 break
 
-
-            description = descriptor.describe_scene(timestep)
-            #print(description)
             action_reader = ActionReader(env, action_map)
+
+            ## --------- TODO OUR CODE HERE ---------
+            # Process to calculate the new actions map
+
+            # Get the description of the scene
+            description = descriptor.describe_scene(timestep)
             
-            newest_action_map = await action_planner.transform_obs_into_actions(str(description))
-            new_actions = action_reader.llm_step(newest_action_map, player_prefixes)
-            print("LLM ACTIONS\n ", new_actions)
-            timestep = env.step(new_actions)
-            
+            if not first_move:
+                # Get the next action map
+                next_action_map = await action_planner.transform_obs_into_actions(str(description))
+            else:
+                first_move = False
             # Compute next timestep
-            #actions = action_reader.step(player_prefix) if player_count else []
+            new_actions = action_reader.various_agents_step(next_action_map, player_prefixes)
+            #print("LLM ACTIONS\n ", new_actions)
 
+            # Execute the old actions map
+            timestep = env.step(new_actions)
+            ## --------- END OF OUR CODE ---------
 
-            #timestep = env.step(actions)
             if record:
                 if record_counter % 5 == 0:
                     game_recorder.record(timestep, description)

@@ -73,8 +73,11 @@ class SceneDescriptor:
 
         result = {}
         for avatar_id, avatar in self.avatars.items():
+            print(avatar.position)
             result[avatar_id] = {"observation": avatar.partial_observation,
-                                 "agents_in_observation": avatar.agents_in_observation}
+                                 "agents_in_observation": avatar.agents_in_observation,
+                                 "global_position": avatar.position,
+                                 "orientation": int(avatar.orientation)}
         return result
 
     def parse_zaps(self, zaps):
