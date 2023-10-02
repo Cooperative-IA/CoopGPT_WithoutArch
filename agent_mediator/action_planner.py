@@ -5,6 +5,8 @@ import json
 import ast
 from agent_mediator.llm_mediator import llm_mediator
 from agent_mediator.agent import Agent
+import os
+from dotenv import load_dotenv
 
 ruta_config = "config/config.json"  
 
@@ -50,11 +52,16 @@ class ActionPlanner(object):
         self.agents_current_goals ={}
         self.agents_count = agents_count
         self.agents_bio_path = agents_bio_path
-
+        self.initalize_env()
         # Initialize the global system context
         self.initialize_system_context(agents_count, number_of_roles = 1)
         # Create the agents list
         self.agents_dictionary = self.initialize_agents_bio()
+
+
+    def initialize_env():
+        load_dotenv()
+
 
     def initialize_agents_bio(self):
         agents_dictionary = {}

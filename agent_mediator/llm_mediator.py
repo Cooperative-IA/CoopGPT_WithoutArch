@@ -1,9 +1,9 @@
 import os
-
-os.environ["OPENAI_API_TYPE"] = "azure"
-os.environ["OPENAI_API_VERSION"] = "2023-05-15"
-os.environ["OPENAI_API_BASE"] = "https://invuniandesai.openai.azure.com/"
-os.environ["OPENAI_API_KEY"] = "cf0bd49030ed4aa6a6509be1cd9d604b"
+env = os.getenv("ENV")
+os.environ["OPENAI_API_TYPE"] = os.getenv("OPENAI_API_TYPE")    
+os.environ["OPENAI_API_VERSION"] = os.getenv("OPENAI_API_VERSION")
+os.environ["OPENAI_API_BASE"] = os.getenv("AZURE_OPENAI_ENDPOINT_GPT3")
+os.environ["OPENAI_API_KEY"] = os.getenv("AZURE_OPENAI_KEY_GPT3")
 
 import openai
 import json
@@ -14,8 +14,8 @@ import ast
 
 class llm_mediator(object):
     def __init__(self):
-        self.engine_name =  "gpt-35-turbo-16k-rfmanrique"
-        self.data_path = "/home/jeyseb/MeltingPot/CoopGPT_WithoutArch/data/"
+        self.engine_name =  os.getenv("GPT_35_MODEL_ID")
+        self.data_path = os.getenv("DATA_PATH")
         self.initial_context = ""
         self.format_example = ""
         self.messages_history = {}
@@ -35,7 +35,7 @@ class llm_mediator(object):
         
         current_messages_history.append({"role": "user", "content": query})
         response = openai.ChatCompletion.create(
-            engine="gpt-35-turbo-16k-rfmanrique",
+            engine=self.engine_name,
             messages=self.messages_history,
             )   
         # append the new response to the messages history
